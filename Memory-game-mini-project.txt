@@ -1,0 +1,141 @@
+# implementation of card game - Memory  -- yashjain28
+
+import simplegui
+import random
+num = []
+card_h=100
+card_w=50
+rect = []
+state = 0
+k = 0
+old = -1
+new = -2
+open_list= []
+turn = 0
+# helper function to initialize globals
+def new_game():
+    global num, state, rect, old, new, open_list, turn
+    turn = 0
+    new = -1
+    old = -2
+    rect = []
+    state = 0
+    open_list= []
+    num1=range(8)
+    #random.shuffle(num1)
+    #print num1
+    num2=range(8)
+    #random.shuffle(num2)
+    num=num1+num2
+    random.shuffle(num)
+    print num
+    state = 0
+     
+# define event handlers
+def mouseclick(pos):
+    # add game state logic here
+    global state, old, new, turn
+    i = 0
+    j = 0
+    #print pos[0],pos[1]
+    while j < 16:
+        #print  rect[i][0][0], rect[i][1][0]
+        if (pos[0] > rect[j][0][0] and pos[0]< rect[j][1][0]): 
+            i = j
+            
+            
+        j = j + 1
+    print open_list
+    if state == 0:
+        old = i
+        new = i
+        turn = turn + 1
+    elif state == 1 and ((i in open_list) or (i==old or i==new)):
+        return
+    elif state == 1:
+        new = i
+        if (num[new] == num[old]) and ((new not in open_list) and (old not in open_list)):
+            open_list.append(old)
+            open_list.append(new)
+           
+    elif state == 2 and ((i in open_list) or (i==old or i==new)): 
+        return
+    else:
+        old = i
+        new = i
+        turn = turn + 1
+    #print "old and new clicks ",old," ", new
+    
+    if state == 0:
+        state = 1
+    elif state == 1:
+        state = 2
+    else:
+        state = 1
+    
+
+    #print "state= "+str(state)
+                             
+                        
+# cards are logically 50x100 pixels in size    
+def draw(canvas):
+    global num, k
+    i = 0
+    #for j in num: 
+    #   canvas.draw_text(str(j), (card_w/2-10+(50*i),card_h/2+10), 40, 'yellow')
+    #    i = i + 1
+    k1 = 0
+    i = 0
+    if state==0:
+        while k1<16:
+            canvas.draw_polygon([[0+50*i,0],[50+50*i,0],[50+50*i,100],[0+50*i,100]],2,'black','blue') 
+            rect.append([[0+50*i,0],[50+50*i,0],[50+50*i,100],[0+50*i,100]])
+            k1 = k1 + 1
+            i = i + 1
+    i = 0 
+    while k1<16:
+        canvas.draw_polygon([[0+50*i,0],[50+50*i,0],[50+50*i,100],[0+50*i,100]],2,'black','blue')
+        k1 = k1 + 1
+        i = i + 1
+    i = 0    
+    if state ==1:
+        i = old
+        k = old
+        canvas.draw_polygon([[0+50*i,0],[50+50*i,0],[50+50*i,100],[0+50*i,100]],2,'black','red')
+        canvas.draw_text(str(num[old]), (card_w/2-10+(50*k),card_h/2+10), 40, 'yellow')
+        i = new
+        k = new        
+        canvas.draw_polygon([[0+50*i,0],[50+50*i,0],[50+50*i,100],[0+50*i,100]],2,'black','red')
+        canvas.draw_text(str(num[new]), (card_w/2-10+(50*k),card_h/2+10), 40, 'yellow')
+           
+    i = 0
+    if state == 2:
+        i = old
+        k = old
+        canvas.draw_polygon([[0+50*i,0],[50+50*i,0],[50+50*i,100],[0+50*i,100]],2,'black','red')
+        canvas.draw_text(str(num[old]), (card_w/2-10+(50*k),card_h/2+10), 40, 'yellow')
+    
+        i = new
+        k = new        
+        canvas.draw_polygon([[0+50*i,0],[50+50*i,0],[50+50*i,100],[0+50*i,100]],2,'black','red')
+        canvas.draw_text(str(num[new]), (card_w/2-10+(50*k),card_h/2+10), 40, 'yellow')
+    
+    for x in open_list:
+        i = x
+        k = x
+        canvas.draw_polygon([[0+50*i,0],[50+50*i,0],[50+50*i,100],[0+50*i,100]],2,'black','red')
+        canvas.draw_text(str(num[x]), (card_w/2-10+(50*k),card_h/2+10), 40, 'yellow')
+    label.set_text("Turns = "+str(turn))
+                
+# create frame and add a button and labels
+frame = simplegui.create_frame("Memory", 800, 100)
+frame.add_button("Reset", new_game)
+label = frame.add_label("Turns = "+str(turn))
+
+# register event handlers
+frame.set_mouseclick_handler(mouseclick)
+frame.set_draw_handler(draw)
+
+# get things rolling
+new_game()
+frame.start()
